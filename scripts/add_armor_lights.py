@@ -9,9 +9,8 @@ def add_lights(source_path: str, output_path: str, color: tuple[float, float, fl
     output = Path(output_path)
 
     if output.exists():
-        raise FileExistsError(
-            f"{output} 已存在。为防止覆盖手动灯光位置，请先备份或删除该派生文件。"
-        )
+        print(f"Skipping {output} because it already exists. (为防止覆盖手动灯光位置，请先手动删除它以重新生成。)")
+        return
     shutil.copy2(source, output)
 
     stage = Usd.Stage.Open(str(output))
@@ -67,15 +66,21 @@ def add_lights(source_path: str, output_path: str, color: tuple[float, float, fl
     print(f"root: {root_path}")
     print(f"bounds: {minimum} -> {maximum}")
 
+base_dir = Path(__file__).resolve().parent.parent / "USD"
 
-add_lights(
-    "/home/matt/Documents/isaac/armor_module/R3.usd",
-    "/home/matt/Documents/isaac/armor_module/R3_lit.usd",
-    (1.0, 0.01, 0.01),
-)
+# 统一处理所有红蓝装甲板
+tasks = [
+    ("R1.usd", "R1_lit.usd", (1.0, 0.01, 0.01)), # 替换此处的输入和输入的名字
+    ("B1.usd", "B1_lit.usd", (0.01, 0.08, 1.0)),
+]
 
-add_lights(
-    "/home/matt/Documents/isaac/armor_module/B3.usd",
-    "/home/matt/Documents/isaac/armor_module/B3_lit.usd",
-    (0.01, 0.08, 1.0),
-)
+for src_name, out_name, color in tasks:
+    src_file = base_dir / src_name
+    out_file = base_dir / out_name
+    if src_file.exists():
+        try:
+            add_lights(str(src_file), str(out_file), color)
+        except Exception as e:
+            print(f"处理 {src_name} 时出错: {e}")
+    else:
+        print(f"未找到源文件: {src_file}")

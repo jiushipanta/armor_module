@@ -1,3 +1,4 @@
+from pathlib import Path
 from isaacsim import SimulationApp
 
 simulation_app = SimulationApp({
@@ -6,9 +7,9 @@ simulation_app = SimulationApp({
 
 try:
     import runpy
-
+    current_dir = Path(__file__).resolve().parent
     runpy.run_path(
-        "/home/matt/Documents/isaac/armor_module/add_armor_lights.py",
+        str(current_dir / "add_armor_lights.py"),
         run_name="__main__",
     )
 finally:
